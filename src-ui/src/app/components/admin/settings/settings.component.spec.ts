@@ -408,7 +408,7 @@ describe('SettingsComponent', () => {
         index_last_modified: new Date().toISOString(),
         index_error: null,
         classifier_status: SystemStatusItemStatus.OK,
-        classifier_last_modified: new Date().toISOString(),
+        classifier_last_trained: new Date().toISOString(),
         classifier_error: null,
       },
     }
