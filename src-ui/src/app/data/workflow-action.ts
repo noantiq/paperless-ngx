@@ -26,5 +26,7 @@ export interface WorkflowAction extends ObjectWithId {
 
   assign_change_groups?: number[] // [Group.id]
 
+  merge_permissions?: boolean
+
   assign_custom_fields?: number[] // [CustomField.id]
 }

@@ -552,7 +552,13 @@ def run_workflow(
                 if action.assign_storage_path is not None:
                     document.storage_path = action.assign_storage_path
 
-                if action.assign_owner is not None:
+                # if merging, only assign owner if the document doesn't already have one
+                # if not merging, always assign owner even if None
+                if not action.merge_permissions or (
+                    action.merge_permissions
+                    and action.assign_owner is not None
+                    and document.owner is None
+                ):
                     document.owner = action.assign_owner
 
                 if action.assign_title is not None:
@@ -585,7 +591,8 @@ def run_workflow(
                         )
 
                 if (
-                    (
+                    not action.merge_permissions
+                    or (
                         action.assign_view_users is not None
                         and action.assign_view_users.count() > 0
                     )
@@ -621,7 +628,7 @@ def run_workflow(
                     set_permissions_for_object(
                         permissions=permissions,
                         object=document,
-                        merge=True,
+                        merge=action.merge_permissions,
                     )
 
                 if action.assign_custom_fields is not None:

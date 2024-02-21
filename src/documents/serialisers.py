@@ -1459,6 +1459,7 @@ class WorkflowActionSerializer(serializers.ModelSerializer):
             "assign_view_groups",
             "assign_change_users",
             "assign_change_groups",
+            "merge_permissions",
             "assign_custom_fields",
         ]
 
@@ -1539,6 +1540,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                 assign_view_groups = action.pop("assign_view_groups", None)
                 assign_change_users = action.pop("assign_change_users", None)
                 assign_change_groups = action.pop("assign_change_groups", None)
+                merge_permissions = action.pop("merge_permissions", True)
                 assign_custom_fields = action.pop("assign_custom_fields", None)
                 action_instance, _ = WorkflowAction.objects.update_or_create(
                     id=action.get("id"),
@@ -1554,6 +1556,7 @@ class WorkflowSerializer(serializers.ModelSerializer):
                     action_instance.assign_change_users.set(assign_change_users)
                 if assign_change_groups is not None:
                     action_instance.assign_change_groups.set(assign_change_groups)
+                action_instance.merge_permissions = merge_permissions
                 if assign_custom_fields is not None:
                     action_instance.assign_custom_fields.set(assign_custom_fields)
                 set_actions.append(action_instance)

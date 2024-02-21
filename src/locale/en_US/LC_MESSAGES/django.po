@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: paperless-ngx\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-14 16:47-0800\n"
+"POT-Creation-Date: 2024-02-21 11:14-0800\n"
 "PO-Revision-Date: 2022-02-17 04:17\n"
 "Last-Translator: \n"
 "Language-Team: English\n"
@@ -53,7 +53,7 @@ msgstr ""
 msgid "Automatic"
 msgstr ""
 
-#: documents/models.py:62 documents/models.py:397 documents/models.py:1102
+#: documents/models.py:62 documents/models.py:397 documents/models.py:1107
 #: paperless_mail/models.py:18 paperless_mail/models.py:93
 msgid "name"
 msgstr ""
@@ -740,31 +740,35 @@ msgstr ""
 msgid "grant change permissions to these groups"
 msgstr ""
 
-#: documents/models.py:1090
-msgid "assign these custom fields"
-msgstr ""
-
-#: documents/models.py:1094
-msgid "workflow action"
+#: documents/models.py:1088
+msgid "merge permissions"
 msgstr ""
 
 #: documents/models.py:1095
+msgid "assign these custom fields"
+msgstr ""
+
+#: documents/models.py:1099
+msgid "workflow action"
+msgstr ""
+
+#: documents/models.py:1100
 msgid "workflow actions"
 msgstr ""
 
-#: documents/models.py:1104 paperless_mail/models.py:95
+#: documents/models.py:1109 paperless_mail/models.py:95
 msgid "order"
 msgstr ""
 
-#: documents/models.py:1110
+#: documents/models.py:1115
 msgid "triggers"
 msgstr ""
 
-#: documents/models.py:1117
+#: documents/models.py:1122
 msgid "actions"
 msgstr ""
 
-#: documents/models.py:1120
+#: documents/models.py:1125
 msgid "enabled"
 msgstr ""
 

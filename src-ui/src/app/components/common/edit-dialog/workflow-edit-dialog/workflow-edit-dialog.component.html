@@ -104,7 +104,7 @@
                           </div>
                           <div class="col">
                             <pngx-input-select i18n-title title="Assign owner" [items]="users" bindLabel="username" formControlName="assign_owner" [allowNull]="true"></pngx-input-select>
-                            <div>
+                            <div class="mb-3">
                               <label class="form-label" i18n>Assign view permissions</label>
                               <div class="mb-2">
                                 <div class="row mb-1">
@@ -145,6 +145,7 @@
                                 <small class="form-text text-muted text-end d-block" i18n>Edit permissions also grant viewing permissions</small>
                               </div>
                             </div>
+                            <pngx-input-switch i18n-title title="Merge with existing permissions" [horizontal]="true" [hint]="getMergeHint(i)" formControlName="merge_permissions"></pngx-input-switch>
                           </div>
                         </div>
 

@@ -214,6 +214,7 @@ export class WorkflowEditDialogComponent
         assign_view_groups: new FormControl(action.assign_view_groups),
         assign_change_users: new FormControl(action.assign_change_users),
         assign_change_groups: new FormControl(action.assign_change_groups),
+        merge_permissions: new FormControl(action.merge_permissions),
         assign_custom_fields: new FormControl(action.assign_custom_fields),
       }),
       { emitEvent }
@@ -289,6 +290,7 @@ export class WorkflowEditDialogComponent
       assign_view_groups: [],
       assign_change_users: [],
       assign_change_groups: [],
+      merge_permissions: true,
       assign_custom_fields: [],
     }
     this.object.actions.push(action)
@@ -316,5 +318,11 @@ export class WorkflowEditDialogComponent
     this.actionFields.insert(event.currentIndex, actionField)
     // removing id will effectively re-create the actions in this order
     this.object.actions.forEach((a) => (a.id = null))
+  }
+
+  getMergeHint(index: number): string {
+    return this.actionFields.at(index).value['merge_permissions']
+      ? $localize`Existing owner, user and group permissions will be merged with these settings.`
+      : $localize`Any and all existing owner, user and group permissions will be replaced.`
   }
 }

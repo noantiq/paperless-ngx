@@ -54,6 +54,7 @@ class TestWorkflows(DirectoriesMixin, FileSystemAssertsMixin, APITestCase):
             data_type="integer",
         )
 
+        self.user1 = User.objects.create(username="user1")
         self.user2 = User.objects.create(username="user2")
         self.user3 = User.objects.create(username="user3")
         self.group1 = Group.objects.create(name="group1")
@@ -1103,7 +1104,10 @@ class TestWorkflows(DirectoriesMixin, FileSystemAssertsMixin, APITestCase):
             type=WorkflowTrigger.WorkflowTriggerType.DOCUMENT_UPDATED,
             filter_has_document_type=self.dt,
         )
-        action = WorkflowAction.objects.create()
+        action = WorkflowAction.objects.create(
+            merge_permissions=True,
+            assign_owner=self.user1,
+        )
         action.assign_view_users.add(self.user3)
         action.assign_change_users.add(self.user3)
         action.assign_view_groups.add(self.group2)
@@ -1121,6 +1125,7 @@ class TestWorkflows(DirectoriesMixin, FileSystemAssertsMixin, APITestCase):
             title="sample test",
             correspondent=self.c,
             original_filename="sample.pdf",
+            owner=self.user2,
         )
 
         assign_perm("documents.view_document", self.user2, doc)
@@ -1145,6 +1150,8 @@ class TestWorkflows(DirectoriesMixin, FileSystemAssertsMixin, APITestCase):
             doc,
             only_with_perms_in=["change_document"],
         )
+        # owner should not have been changed because merge and already set
+        self.assertEqual(doc.owner, self.user2)
         # user2 should still have permissions
         self.assertIn(self.user2, view_users_perms)
         self.assertIn(self.user2, change_users_perms)
@@ -1155,6 +1162,83 @@ class TestWorkflows(DirectoriesMixin, FileSystemAssertsMixin, APITestCase):
         group_perms: QuerySet = get_groups_with_perms(doc)
         # group1 should still have permissions
         self.assertIn(self.group1, group_perms)
+        # group2 should have been added
+        self.assertIn(self.group2, group_perms)
+
+    def test_document_updated_workflow_overwrite_permissions(self):
+        """
+        GIVEN:
+            - Existing workflow with UPDATED trigger and action that sets permissions
+            - merge_permissions is set to False
+        WHEN:
+            - Document is updated that already has permissions
+        THEN:
+            - Permissions are overwritten
+        """
+        trigger = WorkflowTrigger.objects.create(
+            type=WorkflowTrigger.WorkflowTriggerType.DOCUMENT_UPDATED,
+            filter_has_document_type=self.dt,
+        )
+        action = WorkflowAction.objects.create(
+            merge_permissions=False,
+            assign_owner=self.user1,
+        )
+        action.assign_view_users.add(self.user3)
+        action.assign_change_users.add(self.user3)
+        action.assign_view_groups.add(self.group2)
+        action.assign_change_groups.add(self.group2)
+        action.save()
+
+        w = Workflow.objects.create(
+            name="Workflow 1",
+            order=0,
+        )
+        w.triggers.add(trigger)
+        w.actions.add(action)
+        w.save()
+
+        doc = Document.objects.create(
+            title="sample test",
+            correspondent=self.c,
+            original_filename="sample.pdf",
+            owner=self.user2,
+        )
+
+        assign_perm("documents.view_document", self.user2, doc)
+        assign_perm("documents.change_document", self.user2, doc)
+        assign_perm("documents.view_document", self.group1, doc)
+        assign_perm("documents.change_document", self.group1, doc)
+
+        superuser = User.objects.create_superuser("superuser")
+        self.client.force_authenticate(user=superuser)
+
+        self.client.patch(
+            f"/api/documents/{doc.id}/",
+            {"document_type": self.dt.id},
+            format="json",
+        )
+        doc.refresh_from_db()
+
+        view_users_perms: QuerySet = get_users_with_perms(
+            doc,
+            only_with_perms_in=["view_document"],
+        )
+        change_users_perms: QuerySet = get_users_with_perms(
+            doc,
+            only_with_perms_in=["change_document"],
+        )
+        # owner should have been changed
+        self.assertEqual(doc.owner, self.user1)
+        # user2 should no longer have permissions
+        self.assertNotIn(self.user2, view_users_perms)
+        self.assertNotIn(self.user2, change_users_perms)
+        # user3 should have been added
+        self.assertIn(self.user3, view_users_perms)
+        self.assertIn(self.user3, change_users_perms)
+
+        group_perms: QuerySet = get_groups_with_perms(doc)
+        # group1 should no longer have permissions
+        self.assertNotIn(self.group1, group_perms)
         # group2 should have been added
         self.assertIn(self.group2, group_perms)
 

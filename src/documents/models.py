@@ -1083,6 +1083,11 @@ class WorkflowAction(models.Model):
         verbose_name=_("grant change permissions to these groups"),
     )
 
+    merge_permissions = models.BooleanField(
+        default=True,
+        verbose_name=_("merge permissions"),
+    )
+
     assign_custom_fields = models.ManyToManyField(
         CustomField,
         blank=True,

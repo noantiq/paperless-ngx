@@ -58,13 +58,19 @@ const workflow: Workflow = {
       id: 1,
       type: WorkflowActionType.Assignment,
       assign_title: 'foo',
+      merge_permissions: true,
     },
     {
       id: 4,
       type: WorkflowActionType.Assignment,
       assign_owner: 2,
+      merge_permissions: false,
     },
   ],
+}
+
+function cloneWorkflow() {
+  return JSON.parse(JSON.stringify(workflow))
 }
 
 describe('WorkflowEditDialogComponent', () => {
@@ -206,7 +212,7 @@ describe('WorkflowEditDialogComponent', () => {
   })
 
   it('should support add and remove triggers and actions', () => {
-    component.object = workflow
+    component.object = cloneWorkflow()
     component.addTrigger()
     expect(component.object.triggers.length).toEqual(2)
     component.addAction()
@@ -218,21 +224,32 @@ describe('WorkflowEditDialogComponent', () => {
   })
 
   it('should update order and remove ids from actions on drag n drop', () => {
-    const action1 = workflow.actions[0]
-    const action2 = workflow.actions[1]
-    component.object = workflow
+    component.object = cloneWorkflow()
+    expect(component.object.actions[0].id).not.toBeNull()
+    expect(component.object.actions[1].id).not.toBeNull()
     component.ngOnInit()
     component.onActionDrop({ previousIndex: 0, currentIndex: 1 } as CdkDragDrop<
       WorkflowAction[]
     >)
-    expect(component.object.actions).toEqual([action2, action1])
-    expect(action1.id).toBeNull()
-    expect(action2.id).toBeNull()
+    expect(component.object.actions.length).toEqual(2)
+    expect(component.object.actions[0].id).toBeNull()
+    expect(component.object.actions[1].id).toBeNull()
   })
 
   it('should not include auto matching in algorithms', () => {
     expect(component.getMatchingAlgorithms()).not.toContain(
       MATCHING_ALGORITHMS.find((a) => a.id === MATCH_AUTO)
+    )
+  })
+
+  it('should return the correct merge hint according to merge_permissions', () => {
+    component.object = cloneWorkflow()
+    component.ngOnInit()
+    expect(component.getMergeHint(0)).toEqual(
+      'Existing owner, user and group permissions will be merged with these settings.'
+    )
+    expect(component.getMergeHint(1)).toEqual(
+      'Any and all existing owner, user and group permissions will be replaced.'
     )
   })
 })
