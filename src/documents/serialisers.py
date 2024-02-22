@@ -528,9 +528,23 @@ class CustomFieldInstanceSerializer(serializers.ModelSerializer):
             elif field.data_type == CustomField.FieldDataType.INT:
                 integer_validator(data["value"])
             elif field.data_type == CustomField.FieldDataType.MONETARY:
-                DecimalValidator(max_digits=12, decimal_places=2)(
-                    Decimal(str(data["value"])),
-                )
+                try:
+                    # First try to validate as a number from legacy format
+                    DecimalValidator(max_digits=12, decimal_places=2)(
+                        Decimal(str(data["value"])),
+                    )
+                except Exception:
+                    # If that fails, try to validate as a monetary string
+                    if (
+                        re.search(
+                            r"^[A-Z][A-Z][A-Z]\d+(\.\d{2,2})$",
+                            str(data["value"]),
+                        )
+                        is None
+                    ):
+                        raise serializers.ValidationError(
+                            "Must be a number with two decimals and optional currency code e.g. GBP123.45",
+                        )
             elif field.data_type == CustomField.FieldDataType.STRING:
                 MaxLengthValidator(limit_value=128)(data["value"])
 
